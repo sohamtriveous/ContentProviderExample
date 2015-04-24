@@ -7,6 +7,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,41 +18,49 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.example.databaseexample.provider.SongsProvider;
+import com.example.databaseexample.model.Collection1;
+import com.example.databaseexample.model.MusicmatchReesponse;
+import com.example.databaseexample.network.Music;
+import com.example.databaseexample.ui.CircleTransform;
+import com.example.databaseexample.ui.MusicAdapter;
 import com.squareup.picasso.Picasso;
 
-public class MainActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Cursor>{
-    private ListView listView;
-    private MusicCursorAdapter musicCursorAdapter;
+import java.util.List;
 
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+
+public class MainActivity extends ActionBarActivity{
+    private ListView listView;
+
+    private MusicAdapter musicAdapter;
     private static int ID_MUSIC = 1;
+
+    private List<Collection1> collection1List;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        musicCursorAdapter = new MusicCursorAdapter(this);
-
         listView = (ListView) findViewById(R.id.activity_main_listview);
-        listView.setAdapter(musicCursorAdapter);
+        listView.setDivider(null);
 
-        getLoaderManager().initLoader(ID_MUSIC, null, this);
-    }
+        Music.getLatestMusic(new Callback<MusicmatchReesponse>() {
+            @Override
+            public void success(MusicmatchReesponse musicmatchReesponse, Response response) {
+                Log.d("MusicMatch", "Number of results: " + musicmatchReesponse.getResults().getCollection1().size());
+                collection1List = musicmatchReesponse.getResults().getCollection1();
+                musicAdapter = new MusicAdapter(MainActivity.this, collection1List);
+                listView.setAdapter(musicAdapter);
+            }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(this, SongsProvider.SONGS_URI, null, null, null, null);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        musicCursorAdapter.swapCursor(data);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        musicCursorAdapter.swapCursor(null);
+            @Override
+            public void failure(RetrofitError error) {
+                Log.e("MusicMatch", "error is " + error.getMessage());
+            }
+        });
     }
 
     @Override
@@ -109,7 +118,7 @@ public class MainActivity extends ActionBarActivity implements LoaderManager.Loa
             viewHolder.name.setText(cursor.getString(cursor.getColumnIndex(MyHelper.Songs.name)));
             viewHolder.artist.setText(cursor.getString(cursor.getColumnIndex(MyHelper.Songs.artist)));
             String path = cursor.getString(cursor.getColumnIndex(MyHelper.Songs.url));
-            Picasso.with(context).load(path).into(viewHolder.imageView);
+            Picasso.with(context).load(path).transform(new CircleTransform()).into(viewHolder.imageView);
         }
     }
 }

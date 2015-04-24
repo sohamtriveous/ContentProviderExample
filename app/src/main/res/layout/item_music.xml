@@ -6,8 +6,8 @@
 
     <ImageView
         android:id="@+id/item_music_image"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:adjustViewBounds="true" />
 
     <LinearLayout
@@ -33,7 +33,7 @@
             android:textColor="#ababab"
             android:textSize="18sp"
             android:text="Linkin Park"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="4dp"/>
 
     </LinearLayout>
 
