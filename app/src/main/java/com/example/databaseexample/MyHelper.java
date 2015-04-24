@@ -6,6 +6,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
+// https://github.com/triveous/ContentProviderExample
+
+
 /**
  * Created by sohammondal on 23/04/15.
  */
