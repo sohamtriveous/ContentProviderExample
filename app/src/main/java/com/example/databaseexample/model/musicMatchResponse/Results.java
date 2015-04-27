@@ -1,8 +1,10 @@
 
-package com.example.databaseexample.model;
+package com.example.databaseexample.model.musicMatchResponse;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.example.databaseexample.model.musicMatchResponse.Collection1;
 import com.google.gson.annotations.Expose;
 
 public class Results {

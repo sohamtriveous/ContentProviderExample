@@ -1,13 +1,10 @@
 package com.example.databaseexample.network;
 
-import com.example.databaseexample.model.MusicmatchReesponse;
-
-import java.util.concurrent.Callable;
+import com.example.databaseexample.model.MusicmatchResponse;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.http.GET;
-import retrofit.http.Path;
 import retrofit.http.Query;
 
 /**
@@ -20,7 +17,7 @@ public class MusicApi {
     public static MusicInterface getApi() {
         if(musicInterface == null) {
             RestAdapter restAdapter = new RestAdapter.Builder()
-//                    .setLogLevel(RestAdapter.LogLevel.FULL)
+                    .setLogLevel(RestAdapter.LogLevel.FULL)
                     .setEndpoint(API_URL)
                     .build();
             musicInterface = restAdapter.create(MusicInterface.class);
@@ -30,9 +27,9 @@ public class MusicApi {
 
     public interface MusicInterface {
         @GET("/api/619szn6c")
-        MusicmatchReesponse getLatestMusic(@Query("apikey") String apiKey);
+        MusicmatchResponse getLatestMusic(@Query("apikey") String apiKey);
 
         @GET("/api/619szn6c")
-        void getLatestMusic(@Query("apikey") String apiKey, Callback<MusicmatchReesponse> callback);
+        void getLatestMusic(@Query("apikey") String apiKey, Callback<MusicmatchResponse> callback);
     }
 }

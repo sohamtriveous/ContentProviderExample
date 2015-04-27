@@ -19,10 +19,6 @@
             </intent-filter>
         </activity>
 
-        <provider
-            android:authorities="com.example.databaseexample.provider.songsprovider"
-            android:name=".provider.SongsProvider" />
-
     </application>
 
 </manifest>

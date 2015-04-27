@@ -1,5 +1,5 @@
 
-package com.example.databaseexample.model;
+package com.example.databaseexample.model.musicMatchResponse;
 
 import com.google.gson.annotations.Expose;
 

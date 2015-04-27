@@ -1,6 +1,6 @@
 package com.example.databaseexample.network;
 
-import com.example.databaseexample.model.MusicmatchReesponse;
+import com.example.databaseexample.model.MusicmatchResponse;
 
 import retrofit.Callback;
 
@@ -14,13 +14,16 @@ public class Music {
         return API_KEY;
     }
 
-    public static void getLatestMusic(Callback<MusicmatchReesponse> callback) {
+    public static void getLatestMusic(Callback<MusicmatchResponse> callback) {
         MusicApi.getApi().getLatestMusic(getApiKey(), callback);
     }
 
-    public static MusicmatchReesponse getLatestMusic() {
+    public static MusicmatchResponse getLatestMusic() {
         return MusicApi.getApi().getLatestMusic(getApiKey());
     }
 
+    public static boolean checkLogin(String username, String password) {
+        return true;
+    }
 
 }

@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.databaseexample.R;
-import com.example.databaseexample.model.Collection1;
+import com.example.databaseexample.model.musicMatchResponse.Collection1;
 import com.squareup.picasso.Picasso;
 
 import java.lang.ref.WeakReference;
@@ -69,9 +69,12 @@ public class MusicAdapter extends BaseAdapter {
         viewHolder.artist.setText(getItem(position).getArtist());
 
         if (getItem(position).getImage().getSrc() != null) {
-            Picasso.with(contextWeakReference.get()).load(getItem(position).getImage().getSrc()).into(viewHolder.imageView);
+            if (null != contextWeakReference) {
+                if (null != contextWeakReference.get()) {
+                    Picasso.with(contextWeakReference.get()).load(getItem(position).getImage().getSrc()).into(viewHolder.imageView);
+                }
+            }
         }
-
         return convertView;
     }
 }

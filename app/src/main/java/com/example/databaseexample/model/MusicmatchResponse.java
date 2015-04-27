@@ -1,9 +1,10 @@
 
 package com.example.databaseexample.model;
 
+import com.example.databaseexample.model.musicMatchResponse.Results;
 import com.google.gson.annotations.Expose;
 
-public class MusicmatchReesponse {
+public class MusicmatchResponse {
 
     @Expose
     private String name;

@@ -1,29 +1,21 @@
 package com.example.databaseexample;
 
-import android.app.LoaderManager;
-import android.content.Context;
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.CursorAdapter;
-import android.widget.ImageView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 
-import com.example.databaseexample.model.Collection1;
-import com.example.databaseexample.model.MusicmatchReesponse;
+import com.example.databaseexample.model.musicMatchResponse.Collection1;
+import com.example.databaseexample.model.MusicmatchResponse;
 import com.example.databaseexample.network.Music;
-import com.example.databaseexample.ui.CircleTransform;
 import com.example.databaseexample.ui.MusicAdapter;
-import com.squareup.picasso.Picasso;
+import com.example.databaseexample.utils.ValidationUtils;
 
 import java.util.List;
 
@@ -31,13 +23,20 @@ import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class MainActivity extends ActionBarActivity{
+public class MainActivity extends ActionBarActivity {
     private ListView listView;
 
     private MusicAdapter musicAdapter;
-    private static int ID_MUSIC = 1;
 
-    private List<Collection1> collection1List;
+    public List<Collection1> collection1List;
+
+    private EditText email;
+    private EditText password;
+    private Button submit;
+    private ProgressBar progressBar;
+    private boolean loginFailure = false;
+
+    private View loginLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,80 +44,96 @@ public class MainActivity extends ActionBarActivity{
         setContentView(R.layout.activity_main);
 
         listView = (ListView) findViewById(R.id.activity_main_listview);
+        email = (EditText) findViewById(R.id.activity_main_email);
+        password = (EditText) findViewById(R.id.activity_main_password);
+        submit = (Button) findViewById(R.id.activity_main_submit);
+        progressBar = (ProgressBar) findViewById(R.id.activity_main_progress);
+        loginLayout = findViewById(R.id.activity_main_loginlayout);
+
         listView.setDivider(null);
 
-        Music.getLatestMusic(new Callback<MusicmatchReesponse>() {
+        submit.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void success(MusicmatchReesponse musicmatchReesponse, Response response) {
-                Log.d("MusicMatch", "Number of results: " + musicmatchReesponse.getResults().getCollection1().size());
-                collection1List = musicmatchReesponse.getResults().getCollection1();
+            public void onClick(View v) {
+                hideLoginLayout();
+                showProgress();
+                if (ValidationUtils.isValidEmail(email.getText().toString())) {
+                    if (ValidationUtils.isPasswordValid(password.getText().toString())) {
+                        if (Music.checkLogin(email.getText().toString(), password.getText().toString())) {
+                            getMusicFromWeb();
+                        } else {
+                            setLoginFailure(true);
+                            hideProgress();
+                            showLoginLayout();
+                            Toast.makeText(MainActivity.this, "Could not login", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        setLoginFailure(true);
+                        hideProgress();
+                        showLoginLayout();
+                        Toast.makeText(MainActivity.this, "Password is not valid", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    setLoginFailure(true);
+                    hideProgress();
+                    showLoginLayout();
+                    Toast.makeText(MainActivity.this, "Email is not valid", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    public boolean isLoginFailure() {
+        return loginFailure;
+    }
+
+    public void setLoginFailure(boolean loginFailure) {
+        this.loginFailure = loginFailure;
+    }
+
+    private void getMusicFromWeb() {
+        Music.getLatestMusic(new Callback<MusicmatchResponse>() {
+            @Override
+            public void success(MusicmatchResponse musicmatchResponse, Response response) {
+                hideProgress();
+                showList();
+                collection1List = musicmatchResponse.getResults().getCollection1();
                 musicAdapter = new MusicAdapter(MainActivity.this, collection1List);
                 listView.setAdapter(musicAdapter);
             }
 
             @Override
             public void failure(RetrofitError error) {
+                setLoginFailure(true);
+                hideList();
+                hideProgress();
+                showLoginLayout();
                 Log.e("MusicMatch", "error is " + error.getMessage());
             }
         });
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+    private void showProgress() {
+        progressBar.setVisibility(View.VISIBLE);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    private void hideProgress() {
+        progressBar.setVisibility(View.GONE);
     }
 
-    private class MusicCursorAdapter extends CursorAdapter {
-        private LayoutInflater layoutInflater;
+    private void showLoginLayout() {
+        loginLayout.setVisibility(View.VISIBLE);
+    }
 
-        public MusicCursorAdapter(Context context) {
-            super(context, null, 0);
-            layoutInflater = LayoutInflater.from(context);
-        }
+    private void hideLoginLayout() {
+        loginLayout.setVisibility(View.GONE);
+    }
 
-        private class ViewHolder {
-            public TextView name;
-            public TextView artist;
-            public ImageView imageView;
-        }
+    private void showList() {
+        listView.setVisibility(View.VISIBLE);
+    }
 
-        @Override
-        public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            View layout = layoutInflater.inflate(R.layout.item_music, parent, false);
-
-            ViewHolder viewHolder = new ViewHolder();
-            viewHolder.name = (TextView) layout.findViewById(R.id.item_music_name);
-            viewHolder.artist = (TextView) layout.findViewById(R.id.item_music_artist);
-            viewHolder.imageView = (ImageView) layout.findViewById(R.id.item_music_image);
-            layout.setTag(viewHolder);
-
-            return layout;
-        }
-
-        @Override
-        public void bindView(View view, Context context, Cursor cursor) {
-            ViewHolder viewHolder = (ViewHolder) view.getTag();
-            viewHolder.name.setText(cursor.getString(cursor.getColumnIndex(MyHelper.Songs.name)));
-            viewHolder.artist.setText(cursor.getString(cursor.getColumnIndex(MyHelper.Songs.artist)));
-            String path = cursor.getString(cursor.getColumnIndex(MyHelper.Songs.url));
-            Picasso.with(context).load(path).transform(new CircleTransform()).into(viewHolder.imageView);
-        }
+    private void hideList() {
+        listView.setVisibility(View.GONE);
     }
 }
